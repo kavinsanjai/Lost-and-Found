@@ -1,0 +1,48 @@
+<div class="d-flex flex-column vh-100">
+
+  <!-- Header -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <button class="btn btn-outline-light me-3" (click)="toggleSidebar()">☰</button>
+      <a class="navbar-brand" href="#">My Dashboard</a>
+      <div class="d-flex">
+        <button class="btn btn-outline-light">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="d-flex flex-grow-1">
+
+    <!-- Sidebar -->
+    <div [ngClass]="{'d-none': !showSidebar}" class="bg-light border-end p-3" style="min-width: 220px;">
+      <h5 class="text-primary">Menu</h5>
+      <ul class="nav flex-column">
+        <li class="nav-item mb-2">
+          <a class="nav-link active" routerLink="dashboard1">Dashboard</a>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link"  routerLink="profile">Profile</a>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link" href="#">Settings</a>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link" href="#">Reports</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+  <div class="flex-grow-1 p-4 overflow-auto" >
+     <router-outlet></router-outlet>
+    </div>
+
+
+  <!-- Footer -->
+   
+  <footer class="bg-dark text-light text-center p-2 mt-auto" >
+    &copy; 2025 My App. All rights reserved.
+  </footer>
+
+</div>
+
