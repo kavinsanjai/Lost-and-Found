@@ -1,0 +1,57 @@
+<div class="complaint-container">
+
+  <h2>Register Lost Complaint</h2>
+
+  <label>Student Name:</label>
+  <input type="text" [(ngModel)]="studentName" placeholder="Enter your name">
+
+  <label>Lost Item:</label>
+  <input type="text" [(ngModel)]="lostItem" placeholder="What did you lose?">
+
+  <label>Complaint Category:</label>
+  <select [(ngModel)]="selectedCategory">
+    <option value="" disabled>Select category</option>
+    <option *ngFor="let category of complaintCategories" [value]="category">{{ category }}</option>
+  </select>
+
+  <div [ngSwitch]="selectedCategory" class="category-icon">
+    <p *ngSwitchCase="'ID Card'">🪪 ID Icon</p>
+    <p *ngSwitchCase="'Laptop'">💻 Laptop Icon</p>
+    <p *ngSwitchCase="'Wallet'">👛 Wallet Icon</p>
+    <p *ngSwitchCase="'Books'">📚 Books Icon</p>
+    <p *ngSwitchCase="'Others'">🎒 Others Icon</p>
+    <p *ngSwitchDefault>Select a category to see icon</p>
+  </div>
+
+  <label>Date:</label>
+  <input type="text" [value]="date" disabled>
+
+  <label>Time (when lost):</label>
+  <input type="time" [(ngModel)]="time">
+
+  <label>Place where you lost the item:</label>
+  <input type="text" [(ngModel)]="lostPlace" placeholder="Eg: Library, Canteen">
+
+  <label>Proof of Ownership (ID No / Serial No / Details):</label>
+  <input type="text" [(ngModel)]="proofOfOwnership" placeholder="Enter proof details">
+
+  <label>Complaint Description:</label>
+  <textarea [(ngModel)]="complaintText"
+    [ngStyle]="{'border-color': complaintText.length < 5 ? 'red' : 'green'}"
+    placeholder="Describe your issue..."></textarea>
+  <p class="char-count">Characters: {{ complaintText.length }}</p>
+
+  <label>Image URL (optional):</label>
+  <input type="text" [(ngModel)]="imageUrl" placeholder="Paste image URL here">
+  <img *ngIf="imageUrl" [src]="imageUrl" alt="Uploaded Image" class="preview-img">
+
+  <button (click)="submitComplaint()"
+    [disabled]="!studentName || !lostItem || !selectedCategory || !complaintText || !lostPlace"
+    [ngClass]="{
+      'valid-btn': studentName && lostItem && selectedCategory && complaintText && lostPlace,
+      'invalid-btn': !(studentName && lostItem && selectedCategory && complaintText && lostPlace)
+    }">Submit</button>
+
+  <p *ngIf="submitted" class="success-msg">✅ Complaint submitted successfully!</p>
+
+</div>
