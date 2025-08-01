@@ -1,0 +1,89 @@
+<div class="container mt-4">
+  <h2>Complaints Report</h2>
+
+  <!-- Debug Info -->
+  <div class="alert alert-info mb-3">
+    <strong>Debug Info:</strong><br>
+    Users Array Length: {{ users.length }}<br>
+    Complaints Count: {{ complaints.length }}<br>
+    Loading: {{ loading }}<br>
+    Error: {{ error }}
+  </div>
+
+  <!-- Service Demo Section -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <strong>Complaint Service Demo</strong>
+      <button class="btn btn-warning btn-sm" (click)="addNewComplaint()">Add Complaint</button>
+    </div>
+    <div class="card-body">
+      <p><strong>Total Complaints:</strong> {{ complaints.length }}</p>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead class="table-secondary">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let complaint of complaints">
+              <td>{{ complaint.id }}</td>
+              <td>{{ complaint.name }}</td>
+              <td>{{ complaint.email }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-danger': complaint.status === 'Urgent',
+                  'bg-warning': complaint.status === 'In Progress',
+                  'bg-success': complaint.status === 'Resolved',
+                  'bg-primary': complaint.status === 'Open'
+                }">
+                  {{ complaint.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Original Users Table -->
+  <div class="card mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <strong>User Complaints List</strong>
+      <div>
+        <button class="btn btn-primary btn-sm me-2" (click)="loadData()">Load API Data</button>
+        <button class="btn btn-success btn-sm" (click)="loadMockData()">Load Sample Data</button>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped table-hover mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>Name</th>
+            <th>HTML URL</th>
+            <th>Avatar URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{ user.login}}</td>
+            <td>{{ user.html_url }}</td>
+            <td>{{ user.avatar_url}}</td>
+          </tr>
+          <tr *ngIf="users.length === 0">
+            <td colspan="3" class="text-center text-muted">
+              <div class="py-3">
+                <i class="fas fa-info-circle me-2"></i>
+                No data available. Click "Load Sample Data" to see example data.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
