@@ -65,37 +65,15 @@ export class Complaints implements OnInit {
   staffContacts = [
     {
       id: 1,
-      name: 'Dr. Sarah Johnson',
+      name: 'Dr. Saravanan',
       role: 'Lost & Found Coordinator',
       department: 'Student Affairs',
-      email: 'sarah.johnson@university.edu',
-      phone: '+1 (555) 123-4567',
-      office: 'Student Center - Room 205',
+      email: 'saravanan@cit.edu.in',
+      phone: '+91 9842006163',
+      office: 'MSS - Room 402',
       availability: 'Mon-Fri: 9:00 AM - 5:00 PM',
-      specialization: 'Electronics, Documents'
-    },
-    {
-      id: 2,
-      name: 'Mr. David Chen',
-      role: 'Security Supervisor',
-      department: 'Campus Security',
-      email: 'david.chen@university.edu',
-      phone: '+1 (555) 234-5678',
-      office: 'Security Office - Main Building',
-      availability: 'Mon-Sun: 24/7 Available',
-      specialization: 'All Categories'
-    },
-    {
-      id: 3,
-      name: 'Ms. Emily Rodriguez',
-      role: 'Student Services Assistant',
-      department: 'Student Affairs',
-      email: 'emily.rodriguez@university.edu',
-      phone: '+1 (555) 345-6789',
-      office: 'Student Center - Room 210',
-      availability: 'Mon-Fri: 8:00 AM - 4:00 PM',
-      specialization: 'Books, Clothing, Accessories'
-    }
+      specialization: 'Development'
+    } 
   ];
 
   // Item Found Modal properties
