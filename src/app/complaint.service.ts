@@ -26,11 +26,40 @@ export interface Complaint {
 })
 export class ComplaintService {
 
-  private complaints: Complaint[]= [];
+  private complaints: Complaint[] = [];
+  private readonly STORAGE_KEY = 'complaints_data';
 
   constructor() { 
-    // No sample data loaded - reports page will start empty
-    console.log('ComplaintService initialized with empty complaints array');
+    // Load complaints from localStorage on service initialization
+    this.loadComplaintsFromStorage();
+    console.log('ComplaintService initialized with complaints from localStorage:', this.complaints.length);
+  }
+
+  // Load complaints from localStorage
+  private loadComplaintsFromStorage() {
+    try {
+      const storedData = localStorage.getItem(this.STORAGE_KEY);
+      if (storedData) {
+        this.complaints = JSON.parse(storedData);
+        console.log('Loaded complaints from localStorage:', this.complaints.length);
+      } else {
+        this.complaints = [];
+        console.log('No stored complaints found, starting with empty array');
+      }
+    } catch (error) {
+      console.error('Error loading complaints from localStorage:', error);
+      this.complaints = [];
+    }
+  }
+
+  // Save complaints to localStorage
+  private saveComplaintsToStorage() {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.complaints));
+      console.log('Saved complaints to localStorage:', this.complaints.length);
+    } catch (error) {
+      console.error('Error saving complaints to localStorage:', error);
+    }
   }
 
   // Get all complaints
@@ -41,7 +70,8 @@ export class ComplaintService {
   // Add new complaint
   addComplaint(complaint: Complaint) {
     this.complaints.push(complaint);
-    console.log('Complaint added:', complaint);
+    this.saveComplaintsToStorage(); // Save to localStorage after adding
+    console.log('Complaint added and saved to localStorage:', complaint);
   }
 
   // Get complaint by ID
@@ -54,6 +84,7 @@ export class ComplaintService {
     const complaint = this.getComplaintById(id);
     if (complaint) {
       complaint.status = status;
+      this.saveComplaintsToStorage(); // Save to localStorage after updating
       console.log('Status updated for complaint', id, 'to', status);
     }
   }
@@ -79,7 +110,14 @@ export class ComplaintService {
     return stats;
   }
 
-  // Load sample data
+  // Clear all complaints (for testing/reset)
+  clearAllComplaints() {
+    this.complaints = [];
+    localStorage.removeItem(this.STORAGE_KEY);
+    console.log('All complaints cleared from localStorage');
+  }
+
+  // Load sample data (for testing purposes only)
   loadSampleData() {
     this.complaints = [
       {
@@ -137,6 +175,7 @@ export class ComplaintService {
         phoneNumber: '9876543212'
       }
     ];
-    console.log('Sample complaints loaded:', this.complaints);
+    this.saveComplaintsToStorage(); // Save sample data to localStorage
+    console.log('Sample complaints loaded and saved to localStorage:', this.complaints);
   }
 } 

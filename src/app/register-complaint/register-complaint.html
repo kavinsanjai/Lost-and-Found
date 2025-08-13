@@ -1,291 +1,216 @@
 <div class="complaint-container">
+  <!-- Header -->
   <div class="form-header">
-    <h2><i class="fas fa-clipboard-list text-primary me-2"></i>Register Lost Item Complaint</h2>
-    <p class="text-muted">Please provide all the details to help us locate your lost item</p>
+    <h2>Register Lost Complaint</h2>
+    <p>Please provide your student details and item information</p>
   </div>
 
-  <form class="complaint-form" (ngSubmit)="submitComplaint()">
-    <!-- Student Information Section -->
+  <div class="complaint-form">
+    <form #complaintForm="ngForm" (ngSubmit)="submitComplaint()" novalidate>
+    <!-- Student Details -->
     <div class="form-section">
-      <h4 class="section-title">
-        <i class="fas fa-user text-primary me-2"></i>Student Information
-      </h4>
+      <h3 class="section-title">Student Details</h3>
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">
-            <label for="studentName">Full Name *</label>
-            <input 
-              type="text" 
-              id="studentName"
-              [(ngModel)]="studentName" 
-              name="studentName"
-              placeholder="Enter your full name"
-              class="form-control"
-              required>
+            <label>Student Name</label>
+            <input class="form-control" type="text" name="studentName" [(ngModel)]="studentName" placeholder="Enter your name" required minlength="2" #studentNameModel="ngModel" [class.filled]="(studentName || '').trim().length > 0">
+            <small class="text-danger" *ngIf="studentNameModel.invalid && studentNameModel.touched">
+              <span *ngIf="studentNameModel.errors?.['required']">Student name is required.</span>
+              <span *ngIf="studentNameModel.errors?.['minlength']">Minimum 2 characters.</span>
+            </small>
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-group">
-            <label for="rollNumber">Roll Number *</label>
-            <input 
-              type="text" 
-              id="rollNumber"
-              [(ngModel)]="rollNumber" 
-              name="rollNumber"
-              placeholder="Enter your roll number"
-              class="form-control"
-              required>
+            <label>Roll Number</label>
+            <input class="form-control" type="text" name="rollNumber" [(ngModel)]="rollNumber" placeholder="Eg: CSE21045" required pattern="^[A-Za-z]{2,5}[0-9]{2,6}$" #rollNumberModel="ngModel" [class.filled]="(rollNumber || '').trim().length > 0">
+            <small class="text-danger" *ngIf="rollNumberModel.invalid && rollNumberModel.touched">
+              <span *ngIf="rollNumberModel.errors?.['required']">Roll number is required.</span>
+              <span *ngIf="rollNumberModel.errors?.['pattern']">Format like CSE21045.</span>
+            </small>
           </div>
         </div>
-      </div>
-      <div class="row">
+
         <div class="col-md-6">
           <div class="form-group">
-            <label for="department">Department *</label>
-            <select 
-              id="department"
-              [(ngModel)]="department" 
-              name="department"
-              class="form-control"
-              required>
-              <option value="" disabled selected>Select your department</option>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Information Technology">Information Technology</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Mechanical">Mechanical</option>
-              <option value="Civil">Civil</option>
-              <option value="Chemical">Chemical</option>
-              <option value="Biotechnology">Biotechnology</option>
-              <option value="Management">Management</option>
+            <label>Department</label>
+            <select class="form-control" name="department" [(ngModel)]="department" required #departmentModel="ngModel" [class.filled]="!!department">
+              <option value="" disabled>Select department</option>
+              <option value="CSE">Msc (SS)</option>
+              <option value="CSE">Msc (DS)</option>
+              <option value="CSE">Msc (DCS)</option>
+              <option value="CSE">Msc (AI)</option>
+              <option value="CSE">Computer Science (CSE)</option>
+              <option value="IT">Information Technology (IT)</option>
+              <option value="ECE">Electronics & Communication (ECE)</option>
+              <option value="EEE">Electrical & Electronics (EEE)</option>
+              <option value="MECH">Mechanical (MECH)</option>
+              <option value="CIVIL">Civil (CIVIL)</option>
+              <option value="AIDS">AI & DS (AIDS)</option>
+              <option value="OTHER">Other</option>
             </select>
+            <small class="text-danger" *ngIf="departmentModel.invalid && departmentModel.touched">Department is required.</small>
           </div>
         </div>
-        <div class="col-md-6">
+
+        <div class="col-md-3">
           <div class="form-group">
-            <label for="year">Year of Study *</label>
-            <select 
-              id="year"
-              [(ngModel)]="year" 
-              name="year"
-              class="form-control"
-              required>
-              <option value="" disabled selected>Select year</option>
-              <option value="1st Year">1st Year</option>
-              <option value="2nd Year">2nd Year</option>
-              <option value="3rd Year">3rd Year</option>
-              <option value="4th Year">4th Year</option>
+            <label>Year</label>
+            <select class="form-control" name="year" [(ngModel)]="year" required #yearModel="ngModel" [class.filled]="!!year">
+              <option value="" disabled>Select year</option>
+              <option>1st Year</option>
+              <option>2nd Year</option>
+              <option>3rd Year</option>
+              <option>4th Year</option>
+              <option>5th Year</option>
             </select>
+            <small class="text-danger" *ngIf="yearModel.invalid && yearModel.touched">Year is required.</small>
           </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6">
+
+        <div class="col-md-3">
           <div class="form-group">
-            <label for="phoneNumber">Phone Number *</label>
-            <input 
-              type="tel" 
-              id="phoneNumber"
-              [(ngModel)]="phoneNumber" 
-              name="phoneNumber"
-              placeholder="Enter your phone number"
-              class="form-control"
-              required>
+            <label>Phone Number</label>
+            <input class="form-control" type="tel" name="phoneNumber" [(ngModel)]="phoneNumber" placeholder="10-digit phone" maxlength="10" required pattern="^[0-9]{10}$" #phoneModel="ngModel" [class.filled]="(phoneNumber || '').trim().length > 0">
+            <small class="form-text text-muted">Digits only</small>
+            <small class="text-danger" *ngIf="phoneModel.invalid && phoneModel.touched">
+              <span *ngIf="phoneModel.errors?.['required']">Phone number is required.</span>
+              <span *ngIf="phoneModel.errors?.['pattern']">Enter exactly 10 digits.</span>
+            </small>
           </div>
         </div>
+
         <div class="col-md-6">
           <div class="form-group">
-            <label for="email">Email Address *</label>
-            <input 
-              type="email" 
-              id="email"
-              [(ngModel)]="email" 
-              name="email"
-              placeholder="Enter your email address"
-              class="form-control"
-              required>
+            <label>Email</label>
+            <input class="form-control" type="email" name="email" [(ngModel)]="email" placeholder="name@college.edu" required email #emailModel="ngModel" [class.filled]="(email || '').trim().length > 0">
+            <small class="text-danger" *ngIf="emailModel.invalid && emailModel.touched">
+              <span *ngIf="emailModel.errors?.['required']">Email is required.</span>
+              <span *ngIf="emailModel.errors?.['email']">Enter a valid email.</span>
+            </small>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Item Information Section -->
+    <!-- Item Details -->
     <div class="form-section">
-      <h4 class="section-title">
-        <i class="fas fa-search text-primary me-2"></i>Lost Item Details
-      </h4>
+      <h3 class="section-title">Item Details</h3>
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">
-            <label for="lostItem">Lost Item Name *</label>
-            <input 
-              type="text" 
-              id="lostItem"
-              [(ngModel)]="lostItem" 
-              name="lostItem"
-              placeholder="What did you lose?"
-              class="form-control"
-              required>
+            <label>Lost Item</label>
+            <input class="form-control" type="text" name="lostItem" [(ngModel)]="lostItem" placeholder="What did you lose?" required minlength="2" #lostItemModel="ngModel" [class.filled]="(lostItem || '').trim().length > 0">
+            <small class="text-danger" *ngIf="lostItemModel.invalid && lostItemModel.touched">
+              <span *ngIf="lostItemModel.errors?.['required']">Lost item is required.</span>
+              <span *ngIf="lostItemModel.errors?.['minlength']">Minimum 2 characters.</span>
+            </small>
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-group">
-            <label for="selectedCategory">Item Category *</label>
-            <select 
-              id="selectedCategory"
-              [(ngModel)]="selectedCategory" 
-              name="selectedCategory"
-              class="form-control"
-              required>
-              <option value="" disabled selected>Select category</option>
+            <label>Complaint Category</label>
+            <select class="form-control" name="selectedCategory" [(ngModel)]="selectedCategory" required #categoryModel="ngModel" [class.filled]="!!selectedCategory">
+              <option value="" disabled>Select category</option>
               <option *ngFor="let category of complaintCategories" [value]="category">{{ category }}</option>
             </select>
+            <small class="text-danger" *ngIf="categoryModel.invalid && categoryModel.touched">Category is required.</small>
           </div>
         </div>
       </div>
-      
-      <div class="category-preview" *ngIf="selectedCategory">
-        <div class="category-icon">
-          <i [class]="getCategoryIcon(selectedCategory)"></i>
-          <span>{{ selectedCategory }}</span>
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label for="complaintText">Detailed Description *</label>
-        <textarea 
-          id="complaintText"
-          [(ngModel)]="complaintText"
-          name="complaintText"
-          class="form-control"
-          rows="4"
-          placeholder="Provide detailed description of your lost item..."
-          required></textarea>
-        <div class="char-count">
-          <span [class]="complaintText.length >= 10 ? 'text-success' : 'text-danger'">
-            {{ complaintText.length }} characters
-          </span>
-          <small class="text-muted">(Minimum 10 characters required)</small>
+      <div class="category-preview">
+        <div class="category-icon" [ngSwitch]="selectedCategory">
+          <p class="mb-0" *ngSwitchCase="'ID Card'">🪪 Showing details for ID Card</p>
+          <p class="mb-0" *ngSwitchCase="'Laptop'">💻 Showing details for Laptop</p>
+          <p class="mb-0" *ngSwitchCase="'Wallet'">👛 Showing details for Wallet</p>
+          <p class="mb-0" *ngSwitchCase="'Books'">📚 Showing details for Books</p>
+          <p class="mb-0" *ngSwitchCase="'Others'">🎒 Showing details for Others</p>
+          <p class="mb-0" *ngSwitchDefault>Select a category to see a preview</p>
         </div>
       </div>
     </div>
 
-    <!-- Location and Time Section -->
+    <!-- Time & Location -->
     <div class="form-section">
-      <h4 class="section-title">
-        <i class="fas fa-map-marker-alt text-primary me-2"></i>Location & Time Details
-      </h4>
+      <h3 class="section-title">Time & Location</h3>
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">
-            <label for="lostPlace">Place Where Lost *</label>
-            <input 
-              type="text" 
-              id="lostPlace"
-              [(ngModel)]="lostPlace" 
-              name="lostPlace"
-              placeholder="Eg: Library, Canteen, Lab, etc."
-              class="form-control"
-              required>
+            <label>Date</label>
+            <input class="form-control" type="date" name="date" [(ngModel)]="date" required #dateModel="ngModel" [class.filled]="!!date">
+            <small class="text-danger" *ngIf="dateModel.invalid && dateModel.touched">Date is required.</small>
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-group">
-            <label for="date">Date Lost *</label>
-            <input 
-              type="date" 
-              id="date"
-              [(ngModel)]="date" 
-              name="date"
-              class="form-control"
-              required>
+            <label>Time (when lost)</label>
+            <input class="form-control" type="time" name="time" [(ngModel)]="time" required #timeModel="ngModel" [class.filled]="!!time">
+            <small class="text-danger" *ngIf="timeModel.invalid && timeModel.touched">Time is required.</small>
           </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
           <div class="form-group">
-            <label for="time">Time Lost *</label>
-            <input 
-              type="time" 
-              id="time"
-              [(ngModel)]="time" 
-              name="time"
-              class="form-control"
-              required>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="proofOfOwnership">Proof of Ownership *</label>
-            <input 
-              type="text" 
-              id="proofOfOwnership"
-              [(ngModel)]="proofOfOwnership" 
-              name="proofOfOwnership"
-              placeholder="ID No / Serial No / Details"
-              class="form-control"
-              required>
+            <label>Place where you lost the item</label>
+            <input class="form-control" type="text" name="lostPlace" [(ngModel)]="lostPlace" placeholder="Eg: Library, Canteen, Lab" required minlength="2" #placeModel="ngModel" [class.filled]="(lostPlace || '').trim().length > 0">
+            <small class="text-danger" *ngIf="placeModel.invalid && placeModel.touched">
+              <span *ngIf="placeModel.errors?.['required']">Place is required.</span>
+              <span *ngIf="placeModel.errors?.['minlength']">Minimum 2 characters.</span>
+            </small>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Additional Information Section -->
+    <!-- Description & Proof -->
     <div class="form-section">
-      <h4 class="section-title">
-        <i class="fas fa-image text-primary me-2"></i>Additional Information
-      </h4>
+      <h3 class="section-title">Description & Proof</h3>
       <div class="form-group">
-        <label for="imageUrl">Image URL (Optional)</label>
-        <input 
-          type="url" 
-          id="imageUrl"
-          [(ngModel)]="imageUrl" 
-          name="imageUrl"
-          placeholder="Paste image URL here"
-          class="form-control">
-        <small class="form-text text-muted">Provide a link to an image of your lost item if available</small>
+    <label>Proof of Ownership (ID No / Serial No / Details)</label>
+  <input class="form-control" type="text" name="proofOfOwnership" [(ngModel)]="proofOfOwnership" placeholder="Enter proof details" [class.filled]="(proofOfOwnership || '').trim().length > 0">
       </div>
-      
-      <div class="image-preview" *ngIf="imageUrl">
-        <img [src]="imageUrl" alt="Item Image" class="preview-img" onerror="this.style.display='none'">
-      </div>
-    </div>
-
-    <!-- Submit Section -->
-    <div class="form-section submit-section">
-      <button 
-        type="button"
-        (click)="submitComplaint()"
-        class="btn btn-primary btn-lg submit-btn">
-        <i class="fas fa-paper-plane me-2"></i>
-        Submit Complaint
-      </button>
-      
-      <!-- Test button for debugging -->
-      <button 
-        type="button"
-        (click)="testSubmit()"
-        class="btn btn-secondary btn-sm ms-2">
-        Test Submit
-      </button>
-      
-      <div class="form-validation" *ngIf="!isFormValid()">
-        <small class="text-danger">
-          <i class="fas fa-exclamation-triangle me-1"></i>
-          Please fill in all required fields marked with *
+      <div class="form-group">
+        <label>Complaint Description</label>
+  <textarea class="form-control" name="complaintText" [(ngModel)]="complaintText" placeholder="Describe your issue..." required minlength="10" #descModel="ngModel" [class.filled]="(complaintText || '').trim().length > 0"></textarea>
+        <p class="char-count">
+          <span class="text-muted">Minimum 10 characters recommended</span>
+          <span>Characters: {{ complaintText.length || 0 }}</span>
+        </p>
+        <small class="text-danger" *ngIf="descModel.invalid && descModel.touched">
+          <span *ngIf="descModel.errors?.['required']">Description is required.</span>
+          <span *ngIf="descModel.errors?.['minlength']">Enter at least 10 characters.</span>
         </small>
       </div>
     </div>
-  </form>
 
-  <!-- Success Message -->
-  <div *ngIf="submitted" class="success-message">
-    <div class="success-content">
-      <i class="fas fa-check-circle text-success"></i>
-      <h4>Complaint Submitted Successfully!</h4>
-      <p>Your complaint has been registered. We'll notify you when your item is found.</p>
-      <small class="text-muted">Complaint ID: #{{ lastComplaintId }}</small>
+    <!-- Attachment -->
+    <div class="form-section">
+      <h3 class="section-title">Attachment (optional)</h3>
+      <div class="form-group">
+    <label>Image URL</label>
+  <input class="form-control" type="text" name="imageUrl" [(ngModel)]="imageUrl" placeholder="Paste image URL here" pattern="^(https?:\/\/).+" #imageUrlModel="ngModel" [class.filled]="(imageUrl || '').trim().length > 0">
+    <small class="text-danger" *ngIf="imageUrlModel.invalid && imageUrlModel.touched">Enter a valid URL starting with http(s)://</small>
+        <img *ngIf="imageUrl" [src]="imageUrl" alt="Uploaded Image" class="preview-img">
+      </div>
     </div>
+
+    <!-- Submit -->
+    <div class="form-section submit-section">
+      <button class="submit-btn" type="submit"
+        [disabled]="complaintForm.invalid"
+        [ngClass]="{
+          'valid-btn': !complaintForm.invalid,
+          'invalid-btn': complaintForm.invalid
+        }">Submit Complaint</button>
+
+      <div *ngIf="complaintForm.invalid" class="form-validation">
+        Tip: Please fill all required fields correctly to enable Submit.
+      </div>
+
+      <p *ngIf="submitted" class="success-msg">✅ Complaint submitted successfully!</p>
+    </div>
+    </form>
   </div>
 </div>
+  
