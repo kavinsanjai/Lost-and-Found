@@ -119,6 +119,9 @@ export class Complaints implements OnInit {
     
     // Load previously reported found items
     this.loadFoundItemsData();
+
+  // Ensure statuses reflect persisted found items after reload
+  this.reconcileFoundItemsWithStatus();
   }
 
   // Load found items data from storage
@@ -126,6 +129,29 @@ export class Complaints implements OnInit {
     const findersData = JSON.parse(localStorage.getItem('foundItemsData') || '{}');
     this.foundItemsReported = new Set(Object.keys(findersData).map(id => parseInt(id)));
     console.log('Loaded found items:', this.foundItemsReported);
+  }
+
+  // Ensure complaint statuses match persisted "item found" records
+  reconcileFoundItemsWithStatus() {
+    const findersData = JSON.parse(localStorage.getItem('foundItemsData') || '{}');
+    const ids = Object.keys(findersData).map(id => parseInt(id, 10));
+    if (ids.length === 0) return;
+
+    let changed = false;
+    ids.forEach(id => {
+      const c = this.complaints.find(x => x.id === id);
+      if (!c) return;
+      if (c.status !== 'In Progress' && c.status !== 'Resolved' && c.status !== 'Closed') {
+        this.complaintService.updateStatus(id, 'In Progress');
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      this.complaints = this.complaintService.getComplaints();
+      this.applyFiltersAndSorting();
+      this.calculateStatistics();
+    }
   }
 
   // Using the ComplaintService
