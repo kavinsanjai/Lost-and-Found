@@ -14,7 +14,12 @@
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
       <strong>Complaint Service Demo</strong>
-      <button class="btn btn-warning btn-sm" (click)="addNewComplaint()">Add Complaint</button>
+      <div>
+        <button class="btn btn-info btn-sm me-2" (click)="refreshComplaints()">
+          <i class="fas fa-sync-alt"></i> Refresh Complaints
+        </button>
+        <button class="btn btn-warning btn-sm" (click)="addNewComplaint()">Add Complaint</button>
+      </div>
     </div>
     <div class="card-body">
       <p><strong>Total Complaints:</strong> {{ complaints.length }}</p>
@@ -42,6 +47,14 @@
                 }">
                   {{ complaint.status }}
                 </span>
+              </td>
+            </tr>
+            <tr *ngIf="complaints.length === 0">
+              <td colspan="4" class="text-center text-muted">
+                <div class="py-3">
+                  <i class="fas fa-inbox me-2"></i>
+                  No complaints found. Register a complaint to see it here.
+                </div>
               </td>
             </tr>
           </tbody>

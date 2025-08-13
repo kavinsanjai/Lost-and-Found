@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ComplaintService, Complaint } from '../complaint.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-complaints',
@@ -10,38 +10,91 @@ import { ComplaintService, Complaint } from '../complaint.service';
   templateUrl: './complaints.html',
   styleUrl: './complaints.css'
 })
-export class Complaints implements OnInit {
-  http = inject(HttpClient);
+export class Complaints implements OnInit, OnDestroy {
   complaintService = inject(ComplaintService);
+  http = inject(HttpClient);
   
-  users: any[] = [];           
   complaints: Complaint[] = [];
+  users: any[] = [];
   loading = false;
   error = '';
+  private refreshInterval: any;
 
   ngOnInit(): void {
-    // Load mock data immediately so table shows data
-    this.loadMockData();
-    // Load complaints from service
-    this.loadComplaintsFromService();
+    this.loadComplaints();
+    // Set up automatic refresh every 2 seconds to catch new complaints
+    this.refreshInterval = setInterval(() => {
+      this.refreshComplaints();
+    }, 2000);
   }
 
-  // Using the ComplaintService
-  loadComplaintsFromService() {
-    // Load sample complaints
-    this.complaintService.loadSampleData();
+  ngOnDestroy(): void {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+  }
+
+  loadComplaints() {
+    this.loading = true;
+    this.error = '';
     
-    // Get complaints from service
+    try {
+      // Get complaints from service
+      this.complaints = this.complaintService.getComplaints();
+      this.loading = false;
+      
+      console.log('Complaints loaded:', this.complaints);
+    } catch (error) {
+      this.loading = false;
+      this.error = 'Error loading complaints';
+      console.error('Error loading complaints:', error);
+    }
+  }
+
+  // Refresh complaints without loading state
+  refreshComplaints() {
+    try {
+      const currentComplaints = this.complaintService.getComplaints();
+      if (currentComplaints.length !== this.complaints.length) {
+        this.complaints = currentComplaints;
+        console.log('Complaints refreshed:', this.complaints);
+      }
+    } catch (error) {
+      console.error('Error refreshing complaints:', error);
+    }
+  }
+
+  updateStatus(id: number, status: string) {
+    this.complaintService.updateStatus(id, status);
+    // Refresh the complaints list
     this.complaints = this.complaintService.getComplaints();
-    
-    // Get complaint count
-    const count = this.complaintService.getComplaintCount();
-    console.log('Total complaints:', count);
-    
-    // Example: Update a complaint status
-    this.complaintService.updateStatus(1, 'Urgent');
   }
 
+  getStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'Urgent': return 'bg-danger';
+      case 'In Progress': return 'bg-warning';
+      case 'Resolved': return 'bg-success';
+      case 'Open': return 'bg-primary';
+      default: return 'bg-secondary';
+    }
+  }
+
+  // Add new complaint method
+  addNewComplaint() {
+    const newComplaint: Complaint = {
+      id: this.complaintService.getComplaintCount() + 1,
+      name: 'New User',
+      email: 'newuser@example.com',
+      username: 'newuser',
+      status: 'Open'
+    };
+    
+    this.complaintService.addComplaint(newComplaint);
+    this.complaints = this.complaintService.getComplaints();
+  }
+
+  // Load API data method
   loadData() {
     this.loading = true;
     this.error = '';
@@ -92,7 +145,7 @@ export class Complaints implements OnInit {
     });
   }
 
-  // Fallback method with mock data if all APIs fail
+  // Load mock data method
   loadMockData() {
     this.loading = false;
     this.error = '';
@@ -124,19 +177,5 @@ export class Complaints implements OnInit {
       }
     ];
     console.log('Mock data loaded:', this.users);
-  }
-
-  // Example: Add a new complaint using service
-  addNewComplaint() {
-    const newComplaint: Complaint = {
-      id: this.complaintService.getComplaintCount() + 1,
-      name: 'New User',
-      email: 'newuser@example.com',
-      username: 'newuser',
-      status: 'Open'
-    };
-    
-    this.complaintService.addComplaint(newComplaint);
-    this.complaints = this.complaintService.getComplaints();
   }
 }
