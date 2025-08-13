@@ -1,11 +1,12 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { CommonModule } from '@angular/common';
 import { ComplaintService } from '../complaint.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NgxChartsModule],
+  imports: [NgxChartsModule, CommonModule],
   templateUrl: './dashboard1.html',
   styleUrls: ['./dashboard1.css']
 })
@@ -20,6 +21,16 @@ export class Dashboard1 implements OnInit, OnDestroy {
   chartData: any[] = [];
   departmentData: any[] = [];
   categoryData: any[] = [];
+
+  // Statistics properties
+  totalComplaints: number = 0;
+  openComplaints: number = 0;
+  inProgressComplaints: number = 0;
+  resolvedComplaints: number = 0;
+  closedComplaints: number = 0;
+  resolutionRate: number = 0;
+  uniqueDepartments: number = 0;
+  uniqueCategories: number = 0;
 
   ngOnInit(): void {
     this.updateChartData();
@@ -38,15 +49,29 @@ export class Dashboard1 implements OnInit, OnDestroy {
   updateChartData() {
     const complaints = this.complaintService.getComplaints();
     
-    // Update status chart (Lost vs Found/Resolved)
-    const openCount = complaints.filter(c => c.status === 'Open').length;
-    const inProgressCount = complaints.filter(c => c.status === 'In Progress').length;
-    const resolvedCount = complaints.filter(c => c.status === 'Resolved').length;
+    // Update basic statistics
+    this.totalComplaints = complaints.length;
+    this.openComplaints = complaints.filter(c => c.status === 'Open').length;
+    this.inProgressComplaints = complaints.filter(c => c.status === 'In Progress').length;
+    this.resolvedComplaints = complaints.filter(c => c.status === 'Resolved').length;
+    this.closedComplaints = complaints.filter(c => c.status === 'Closed').length;
     
+    // Calculate resolution rate
+    const resolvedCount = this.resolvedComplaints + this.closedComplaints;
+    this.resolutionRate = this.totalComplaints > 0 ? Math.round((resolvedCount / this.totalComplaints) * 100) : 0;
+    
+    // Count unique departments and categories
+    const departments = new Set(complaints.map(c => c.department).filter(d => d));
+    const categories = new Set(complaints.map(c => c.category).filter(c => c));
+    this.uniqueDepartments = departments.size;
+    this.uniqueCategories = categories.size;
+    
+    // Update status chart (Lost vs Found/Resolved)
     this.chartData = [
-      { "name": "Open", "value": openCount },
-      { "name": "In Progress", "value": inProgressCount },
-      { "name": "Resolved", "value": resolvedCount }
+      { "name": "Open", "value": this.openComplaints },
+      { "name": "In Progress", "value": this.inProgressComplaints },
+      { "name": "Resolved", "value": this.resolvedComplaints },
+      { "name": "Closed", "value": this.closedComplaints }
     ];
 
     // Update department chart
@@ -70,9 +95,17 @@ export class Dashboard1 implements OnInit, OnDestroy {
     }));
 
     console.log('Dashboard data updated:', {
-      status: this.chartData,
-      departments: this.departmentData,
-      categories: this.categoryData
+      total: this.totalComplaints,
+      open: this.openComplaints,
+      inProgress: this.inProgressComplaints,
+      resolved: this.resolvedComplaints,
+      closed: this.closedComplaints,
+      resolutionRate: this.resolutionRate,
+      departments: this.uniqueDepartments,
+      categories: this.uniqueCategories,
+      statusChart: this.chartData,
+      departmentChart: this.departmentData,
+      categoryChart: this.categoryData
     });
   }
 }
