@@ -1,89 +1,214 @@
-<div class="container mt-4">
-  <h2>Complaints Report</h2>
-
-  <!-- Debug Info -->
-  <div class="alert alert-info mb-3">
-    <strong>Debug Info:</strong><br>
-    Users Array Length: {{ users.length }}<br>
-    Complaints Count: {{ complaints.length }}<br>
-    Loading: {{ loading }}<br>
-    Error: {{ error }}
-  </div>
-
-  <!-- Service Demo Section -->
-  <div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <strong>Complaint Service Demo</strong>
-      <button class="btn btn-warning btn-sm" (click)="addNewComplaint()">Add Complaint</button>
-    </div>
-    <div class="card-body">
-      <p><strong>Total Complaints:</strong> {{ complaints.length }}</p>
-      <div class="table-responsive">
-        <table class="table table-sm table-bordered">
-          <thead class="table-secondary">
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let complaint of complaints">
-              <td>{{ complaint.id }}</td>
-              <td>{{ complaint.name }}</td>
-              <td>{{ complaint.email }}</td>
-              <td>
-                <span class="badge" [ngClass]="{
-                  'bg-danger': complaint.status === 'Urgent',
-                  'bg-warning': complaint.status === 'In Progress',
-                  'bg-success': complaint.status === 'Resolved',
-                  'bg-primary': complaint.status === 'Open'
-                }">
-                  {{ complaint.status }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Header Section -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="mb-1">
+            <i class="fas fa-clipboard-list text-primary me-2"></i>
+            Complaints Management System
+          </h2>
+          <p class="text-muted mb-0">Track and manage all registered complaints</p>
+        </div>
+        <div class="d-flex gap-3 align-items-center">
+          <button class="btn btn-outline-primary" (click)="refreshComplaints()">
+            <i class="fas fa-sync-alt me-1"></i>Refresh
+          </button>
+          <div class="text-end">
+            <div class="h4 mb-0 text-primary">{{ complaints.length }}</div>
+            <small class="text-muted">Total Complaints</small>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Original Users Table -->
-  <div class="card mt-3">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <strong>User Complaints List</strong>
-      <div>
-        <button class="btn btn-primary btn-sm me-2" (click)="loadData()">Load API Data</button>
-        <button class="btn btn-success btn-sm" (click)="loadMockData()">Load Sample Data</button>
+      <!-- Auto-refresh Status -->
+      <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Auto-refresh enabled:</strong> This page automatically updates every 2 seconds to show new complaints.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
-    </div>
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped table-hover mb-0">
-        <thead class="table-dark">
-          <tr>
-            <th>Name</th>
-            <th>HTML URL</th>
-            <th>Avatar URL</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of users">
-            <td>{{ user.login}}</td>
-            <td>{{ user.html_url }}</td>
-            <td>{{ user.avatar_url}}</td>
-          </tr>
-          <tr *ngIf="users.length === 0">
-            <td colspan="3" class="text-center text-muted">
-              <div class="py-3">
-                <i class="fas fa-info-circle me-2"></i>
-                No data available. Click "Load Sample Data" to see example data.
+
+      <!-- Loading and Error States -->
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading complaints data...</p>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <!-- Statistics Dashboard -->
+      <div *ngIf="!loading && !error && complaints.length > 0" class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle mb-3" style="width: 60px; height: 60px;">
+                <i class="fas fa-folder-open text-primary fa-lg"></i>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <h3 class="mb-1 text-primary">{{ openComplaintsCount }}</h3>
+              <p class="text-muted mb-0">Open Complaints</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 rounded-circle mb-3" style="width: 60px; height: 60px;">
+                <i class="fas fa-clock text-warning fa-lg"></i>
+              </div>
+              <h3 class="mb-1 text-warning">{{ inProgressComplaintsCount }}</h3>
+              <p class="text-muted mb-0">In Progress</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-circle mb-3" style="width: 60px; height: 60px;">
+                <i class="fas fa-check-circle text-success fa-lg"></i>
+              </div>
+              <h3 class="mb-1 text-success">{{ resolvedComplaintsCount }}</h3>
+              <p class="text-muted mb-0">Resolved</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Complaints Table -->
+      <div *ngIf="!loading && !error" class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="fas fa-table text-primary me-2"></i>
+              Registered Complaints
+            </h5>
+            <div class="d-flex gap-2">
+              <span class="badge bg-light text-dark border">{{ complaints.length }} records</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="border-0">ID</th>
+                  <th class="border-0">Student Details</th>
+                  <th class="border-0">Item Information</th>
+                  <th class="border-0">Location & Time</th>
+                  <th class="border-0">Status</th>
+                  <th class="border-0">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let complaint of complaints" class="align-middle">
+                  <td>
+                    <span class="badge bg-secondary rounded-pill">#{{ complaint.id }}</span>
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="flex-shrink-0">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                          <i class="fas fa-user text-primary"></i>
+                        </div>
+                      </div>
+                      <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">{{ complaint.name }}</h6>
+                        <div class="small text-muted">
+                          <div><i class="fas fa-id-card me-1"></i>{{ complaint.rollNumber || 'N/A' }}</div>
+                          <div><i class="fas fa-graduation-cap me-1"></i>{{ complaint.department || 'N/A' }} - {{ complaint.year || 'N/A' }}</div>
+                          <div><i class="fas fa-envelope me-1"></i>{{ complaint.email }}</div>
+                          <div><i class="fas fa-phone me-1"></i>{{ complaint.phoneNumber || 'N/A' }}</div>
+                          <div><i class="fas fa-shield-alt me-1"></i>Proof: {{ complaint.proofOfOwnership || 'Not provided' }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div>
+                      <div class="d-flex align-items-center mb-1">
+                        <span class="badge me-2" [ngClass]="getCategoryBadgeClass(complaint.category)">
+                          {{ complaint.category }}
+                        </span>
+                        <strong>{{ complaint.lostItem }}</strong>
+                      </div>
+                      <p class="text-muted mb-0 small">{{ complaint.description }}</p>
+                      <!-- Image Display -->
+                      <div *ngIf="complaint.imageUrl" class="mt-2">
+                        <img [src]="complaint.imageUrl" 
+                             [alt]="'Image for ' + complaint.lostItem"
+                             class="img-thumbnail"
+                             style="max-width: 80px; max-height: 80px; cursor: pointer;"
+                             title="Item Image">
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div>
+                      <div class="d-flex align-items-center mb-1">
+                        <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                        <strong>{{ complaint.lostPlace }}</strong>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar text-info me-2"></i>
+                        <span>{{ complaint.date }}</span>
+                      </div>
+                      <div *ngIf="complaint.time" class="d-flex align-items-center">
+                        <i class="fas fa-clock text-info me-2"></i>
+                        <span>{{ complaint.time }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge rounded-pill" [ngClass]="getStatusBadgeClass(complaint.status)">
+                      {{ complaint.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="btn-group-vertical btn-group-sm" role="group">
+                      <button 
+                        class="btn btn-outline-primary btn-sm" 
+                        (click)="updateStatus(complaint.id, 'Open')"
+                        [disabled]="complaint.status === 'Open'"
+                        title="Mark as Open">
+                        <i class="fas fa-folder-open me-1"></i>Open
+                      </button>
+                      <button 
+                        class="btn btn-outline-warning btn-sm" 
+                        (click)="updateStatus(complaint.id, 'In Progress')"
+                        [disabled]="complaint.status === 'In Progress'"
+                        title="Mark as In Progress">
+                        <i class="fas fa-clock me-1"></i>In Progress
+                      </button>
+                      <button 
+                        class="btn btn-outline-success btn-sm" 
+                        (click)="updateStatus(complaint.id, 'Resolved')"
+                        [disabled]="complaint.status === 'Resolved'"
+                        title="Mark as Resolved">
+                        <i class="fas fa-check me-1"></i>Resolved
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="complaints.length === 0">
+                  <td colspan="6" class="text-center py-5">
+                    <div class="text-muted">
+                      <i class="fas fa-inbox fa-4x mb-4 opacity-50"></i>
+                      <h5>No complaints found</h5>
+                      <p class="mb-0">No complaints have been registered yet.</p>
+                      <small>Complaints will appear here once they are submitted through the registration form.</small>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
