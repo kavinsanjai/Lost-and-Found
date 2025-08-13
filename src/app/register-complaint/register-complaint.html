@@ -1,57 +1,291 @@
 <div class="complaint-container">
-
-  <h2>Register Lost Complaint</h2>
-
-  <label>Student Name:</label>
-  <input type="text" [(ngModel)]="studentName" placeholder="Enter your name">
-
-  <label>Lost Item:</label>
-  <input type="text" [(ngModel)]="lostItem" placeholder="What did you lose?">
-
-  <label>Complaint Category:</label>
-  <select [(ngModel)]="selectedCategory">
-    <option value="" disabled>Select category</option>
-    <option *ngFor="let category of complaintCategories" [value]="category">{{ category }}</option>
-  </select>
-
-  <div [ngSwitch]="selectedCategory" class="category-icon">
-    <p *ngSwitchCase="'ID Card'">🪪 ID Icon</p>
-    <p *ngSwitchCase="'Laptop'">💻 Laptop Icon</p>
-    <p *ngSwitchCase="'Wallet'">👛 Wallet Icon</p>
-    <p *ngSwitchCase="'Books'">📚 Books Icon</p>
-    <p *ngSwitchCase="'Others'">🎒 Others Icon</p>
-    <p *ngSwitchDefault>Select a category to see icon</p>
+  <div class="form-header">
+    <h2><i class="fas fa-clipboard-list text-primary me-2"></i>Register Lost Item Complaint</h2>
+    <p class="text-muted">Please provide all the details to help us locate your lost item</p>
   </div>
 
-  <label>Date:</label>
-  <input type="text" [value]="date" disabled>
+  <form class="complaint-form" (ngSubmit)="submitComplaint()">
+    <!-- Student Information Section -->
+    <div class="form-section">
+      <h4 class="section-title">
+        <i class="fas fa-user text-primary me-2"></i>Student Information
+      </h4>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="studentName">Full Name *</label>
+            <input 
+              type="text" 
+              id="studentName"
+              [(ngModel)]="studentName" 
+              name="studentName"
+              placeholder="Enter your full name"
+              class="form-control"
+              required>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="rollNumber">Roll Number *</label>
+            <input 
+              type="text" 
+              id="rollNumber"
+              [(ngModel)]="rollNumber" 
+              name="rollNumber"
+              placeholder="Enter your roll number"
+              class="form-control"
+              required>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="department">Department *</label>
+            <select 
+              id="department"
+              [(ngModel)]="department" 
+              name="department"
+              class="form-control"
+              required>
+              <option value="" disabled selected>Select your department</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Mechanical">Mechanical</option>
+              <option value="Civil">Civil</option>
+              <option value="Chemical">Chemical</option>
+              <option value="Biotechnology">Biotechnology</option>
+              <option value="Management">Management</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="year">Year of Study *</label>
+            <select 
+              id="year"
+              [(ngModel)]="year" 
+              name="year"
+              class="form-control"
+              required>
+              <option value="" disabled selected>Select year</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number *</label>
+            <input 
+              type="tel" 
+              id="phoneNumber"
+              [(ngModel)]="phoneNumber" 
+              name="phoneNumber"
+              placeholder="Enter your phone number"
+              class="form-control"
+              required>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input 
+              type="email" 
+              id="email"
+              [(ngModel)]="email" 
+              name="email"
+              placeholder="Enter your email address"
+              class="form-control"
+              required>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <label>Time (when lost):</label>
-  <input type="time" [(ngModel)]="time">
+    <!-- Item Information Section -->
+    <div class="form-section">
+      <h4 class="section-title">
+        <i class="fas fa-search text-primary me-2"></i>Lost Item Details
+      </h4>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="lostItem">Lost Item Name *</label>
+            <input 
+              type="text" 
+              id="lostItem"
+              [(ngModel)]="lostItem" 
+              name="lostItem"
+              placeholder="What did you lose?"
+              class="form-control"
+              required>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="selectedCategory">Item Category *</label>
+            <select 
+              id="selectedCategory"
+              [(ngModel)]="selectedCategory" 
+              name="selectedCategory"
+              class="form-control"
+              required>
+              <option value="" disabled selected>Select category</option>
+              <option *ngFor="let category of complaintCategories" [value]="category">{{ category }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="category-preview" *ngIf="selectedCategory">
+        <div class="category-icon">
+          <i [class]="getCategoryIcon(selectedCategory)"></i>
+          <span>{{ selectedCategory }}</span>
+        </div>
+      </div>
 
-  <label>Place where you lost the item:</label>
-  <input type="text" [(ngModel)]="lostPlace" placeholder="Eg: Library, Canteen">
+      <div class="form-group">
+        <label for="complaintText">Detailed Description *</label>
+        <textarea 
+          id="complaintText"
+          [(ngModel)]="complaintText"
+          name="complaintText"
+          class="form-control"
+          rows="4"
+          placeholder="Provide detailed description of your lost item..."
+          required></textarea>
+        <div class="char-count">
+          <span [class]="complaintText.length >= 10 ? 'text-success' : 'text-danger'">
+            {{ complaintText.length }} characters
+          </span>
+          <small class="text-muted">(Minimum 10 characters required)</small>
+        </div>
+      </div>
+    </div>
 
-  <label>Proof of Ownership (ID No / Serial No / Details):</label>
-  <input type="text" [(ngModel)]="proofOfOwnership" placeholder="Enter proof details">
+    <!-- Location and Time Section -->
+    <div class="form-section">
+      <h4 class="section-title">
+        <i class="fas fa-map-marker-alt text-primary me-2"></i>Location & Time Details
+      </h4>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="lostPlace">Place Where Lost *</label>
+            <input 
+              type="text" 
+              id="lostPlace"
+              [(ngModel)]="lostPlace" 
+              name="lostPlace"
+              placeholder="Eg: Library, Canteen, Lab, etc."
+              class="form-control"
+              required>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="date">Date Lost *</label>
+            <input 
+              type="date" 
+              id="date"
+              [(ngModel)]="date" 
+              name="date"
+              class="form-control"
+              required>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="time">Time Lost *</label>
+            <input 
+              type="time" 
+              id="time"
+              [(ngModel)]="time" 
+              name="time"
+              class="form-control"
+              required>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="proofOfOwnership">Proof of Ownership *</label>
+            <input 
+              type="text" 
+              id="proofOfOwnership"
+              [(ngModel)]="proofOfOwnership" 
+              name="proofOfOwnership"
+              placeholder="ID No / Serial No / Details"
+              class="form-control"
+              required>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <label>Complaint Description:</label>
-  <textarea [(ngModel)]="complaintText"
-    [ngStyle]="{'border-color': complaintText.length < 5 ? 'red' : 'green'}"
-    placeholder="Describe your issue..."></textarea>
-  <p class="char-count">Characters: {{ complaintText.length }}</p>
+    <!-- Additional Information Section -->
+    <div class="form-section">
+      <h4 class="section-title">
+        <i class="fas fa-image text-primary me-2"></i>Additional Information
+      </h4>
+      <div class="form-group">
+        <label for="imageUrl">Image URL (Optional)</label>
+        <input 
+          type="url" 
+          id="imageUrl"
+          [(ngModel)]="imageUrl" 
+          name="imageUrl"
+          placeholder="Paste image URL here"
+          class="form-control">
+        <small class="form-text text-muted">Provide a link to an image of your lost item if available</small>
+      </div>
+      
+      <div class="image-preview" *ngIf="imageUrl">
+        <img [src]="imageUrl" alt="Item Image" class="preview-img" onerror="this.style.display='none'">
+      </div>
+    </div>
 
-  <label>Image URL (optional):</label>
-  <input type="text" [(ngModel)]="imageUrl" placeholder="Paste image URL here">
-  <img *ngIf="imageUrl" [src]="imageUrl" alt="Uploaded Image" class="preview-img">
+    <!-- Submit Section -->
+    <div class="form-section submit-section">
+      <button 
+        type="button"
+        (click)="submitComplaint()"
+        class="btn btn-primary btn-lg submit-btn">
+        <i class="fas fa-paper-plane me-2"></i>
+        Submit Complaint
+      </button>
+      
+      <!-- Test button for debugging -->
+      <button 
+        type="button"
+        (click)="testSubmit()"
+        class="btn btn-secondary btn-sm ms-2">
+        Test Submit
+      </button>
+      
+      <div class="form-validation" *ngIf="!isFormValid()">
+        <small class="text-danger">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          Please fill in all required fields marked with *
+        </small>
+      </div>
+    </div>
+  </form>
 
-  <button (click)="submitComplaint()"
-    [disabled]="!studentName || !lostItem || !selectedCategory || !complaintText || !lostPlace"
-    [ngClass]="{
-      'valid-btn': studentName && lostItem && selectedCategory && complaintText && lostPlace,
-      'invalid-btn': !(studentName && lostItem && selectedCategory && complaintText && lostPlace)
-    }">Submit</button>
-
-  <p *ngIf="submitted" class="success-msg">✅ Complaint submitted successfully!</p>
-
+  <!-- Success Message -->
+  <div *ngIf="submitted" class="success-message">
+    <div class="success-content">
+      <i class="fas fa-check-circle text-success"></i>
+      <h4>Complaint Submitted Successfully!</h4>
+      <p>Your complaint has been registered. We'll notify you when your item is found.</p>
+      <small class="text-muted">Complaint ID: #{{ lastComplaintId }}</small>
+    </div>
+  </div>
 </div>

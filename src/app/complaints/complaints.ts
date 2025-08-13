@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ComplaintService, Complaint } from '../complaint.service';
-import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-complaints',
@@ -12,19 +11,17 @@ import { HttpClient } from '@angular/common/http';
 })
 export class Complaints implements OnInit, OnDestroy {
   complaintService = inject(ComplaintService);
-  http = inject(HttpClient);
   
   complaints: Complaint[] = [];
-  users: any[] = [];
   loading = false;
   error = '';
   private refreshInterval: any;
 
   ngOnInit(): void {
     this.loadComplaints();
-    // Set up automatic refresh every 2 seconds to catch new complaints
+    // Set up automatic refresh every 2 seconds to catch new complaints faster
     this.refreshInterval = setInterval(() => {
-      this.refreshComplaints();
+      this.checkForNewComplaints();
     }, 2000);
   }
 
@@ -42,7 +39,6 @@ export class Complaints implements OnInit, OnDestroy {
       // Get complaints from service
       this.complaints = this.complaintService.getComplaints();
       this.loading = false;
-      
       console.log('Complaints loaded:', this.complaints);
     } catch (error) {
       this.loading = false;
@@ -51,28 +47,41 @@ export class Complaints implements OnInit, OnDestroy {
     }
   }
 
-  // Refresh complaints without loading state
-  refreshComplaints() {
+  checkForNewComplaints() {
     try {
       const currentComplaints = this.complaintService.getComplaints();
-      if (currentComplaints.length !== this.complaints.length) {
-        this.complaints = currentComplaints;
-        console.log('Complaints refreshed:', this.complaints);
+      
+      // Check if there are new complaints (by length or by comparing IDs)
+      const hasNewComplaints = currentComplaints.length !== this.complaints.length ||
+        currentComplaints.some((complaint, index) => 
+          !this.complaints[index] || complaint.id !== this.complaints[index].id
+        );
+      
+      if (hasNewComplaints) {
+        console.log('New complaints detected! Updating display...');
+        console.log('Previous count:', this.complaints.length);
+        console.log('Current count:', currentComplaints.length);
+        this.complaints = [...currentComplaints]; // Create a new array reference
+        console.log('Updated complaints:', this.complaints);
       }
     } catch (error) {
-      console.error('Error refreshing complaints:', error);
+      console.error('Error checking for new complaints:', error);
     }
+  }
+
+  refreshComplaints() {
+    console.log('Manual refresh triggered');
+    this.loadComplaints();
   }
 
   updateStatus(id: number, status: string) {
     this.complaintService.updateStatus(id, status);
-    // Refresh the complaints list
     this.complaints = this.complaintService.getComplaints();
+    console.log(`Status updated for complaint ${id} to ${status}`);
   }
 
   getStatusBadgeClass(status: string): string {
     switch (status) {
-      case 'Urgent': return 'bg-danger';
       case 'In Progress': return 'bg-warning';
       case 'Resolved': return 'bg-success';
       case 'Open': return 'bg-primary';
@@ -80,102 +89,29 @@ export class Complaints implements OnInit, OnDestroy {
     }
   }
 
-  // Add new complaint method
-  addNewComplaint() {
-    const newComplaint: Complaint = {
-      id: this.complaintService.getComplaintCount() + 1,
-      name: 'New User',
-      email: 'newuser@example.com',
-      username: 'newuser',
-      status: 'Open'
-    };
+  getCategoryBadgeClass(category: string | undefined): string {
+    if (!category) return 'bg-secondary';
     
-    this.complaintService.addComplaint(newComplaint);
-    this.complaints = this.complaintService.getComplaints();
-  }
-
-  // Load API data method
-  loadData() {
-    this.loading = true;
-    this.error = '';
-    
-    // Try multiple API endpoints in case one fails
-    const apiUrls = [
-      'https://reqres.in/api/users',
-      'https://api.github.com/users',
-      'https://jsonplaceholder.typicode.com/users'
-    ];
-
-    this.tryApiCall(apiUrls, 0);
-  }
-
-  private tryApiCall(urls: string[], index: number) {
-    if (index >= urls.length) {
-      this.loading = false;
-      this.error = 'All API endpoints failed. Using sample data.';
-      return;
+    switch (category) {
+      case 'ID Card': return 'bg-info';
+      case 'Laptop': return 'bg-warning';
+      case 'Wallet': return 'bg-success';
+      case 'Books': return 'bg-primary';
+      case 'Others': return 'bg-secondary';
+      default: return 'bg-secondary';
     }
-
-    const url = urls[index];
-    console.log(`Trying API: ${url}`);
-
-    this.http.get(url).subscribe({
-      next: (result: any) => {
-        this.loading = false;
-        
-        // Handle different API response formats
-        if (result.data) {
-          // reqres.in format
-          this.users = result.data;
-        } else if (Array.isArray(result)) {
-          // jsonplaceholder format
-          this.users = result;
-        } else {
-          // github format or other
-          this.users = Array.isArray(result) ? result : [result];
-        }
-        
-        console.log('Users loaded from API:', this.users);
-      },
-      error: (error) => {
-        console.error(`API ${url} failed:`, error);
-        // Try next API endpoint
-        this.tryApiCall(urls, index + 1);
-      }
-    });
   }
 
-  // Load mock data method
-  loadMockData() {
-    this.loading = false;
-    this.error = '';
-    this.users = [
-      {
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        username: 'johndoe'
-      },
-      {
-        name: 'Jane Smith',
-        email: 'jane.smith@example.com',
-        username: 'janesmith'
-      },
-      {
-        name: 'Bob Johnson',
-        email: 'bob.johnson@example.com',
-        username: 'bobjohnson'
-      },
-      {
-        name: 'Alice Brown',
-        email: 'alice.brown@example.com',
-        username: 'alicebrown'
-      },
-      {
-        name: 'Charlie Wilson',
-        email: 'charlie.wilson@example.com',
-        username: 'charliewilson'
-      }
-    ];
-    console.log('Mock data loaded:', this.users);
+  // Computed properties for statistics
+  get openComplaintsCount(): number {
+    return this.complaints.filter(c => c.status === 'Open').length;
+  }
+
+  get inProgressComplaintsCount(): number {
+    return this.complaints.filter(c => c.status === 'In Progress').length;
+  }
+
+  get resolvedComplaintsCount(): number {
+    return this.complaints.filter(c => c.status === 'Resolved').length;
   }
 }
