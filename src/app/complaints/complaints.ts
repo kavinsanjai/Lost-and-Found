@@ -98,8 +98,8 @@ export class Complaints implements OnInit {
     // Load previously reported found items
     this.loadFoundItemsData();
 
-  // Ensure statuses reflect persisted found items after reload
-  this.reconcileFoundItemsWithStatus();
+    // Ensure statuses reflect persisted found items after reload
+    this.reconcileFoundItemsWithStatus();
   }
 
   // Load found items data from storage
@@ -327,6 +327,9 @@ export class Complaints implements OnInit {
     this.showSubmissionInfo = false;
     this.selectedComplaint = null;
     this.resetItemFoundForm();
+    
+    // Force change detection to update the UI immediately after closing
+    this.cdr.detectChanges();
   }
 
   resetItemFoundForm() {
@@ -363,14 +366,15 @@ export class Complaints implements OnInit {
     this.showSubmissionInfo = true;
     this.cdr.detectChanges();
 
-    // 2) Persist data and update counters/status asynchronously to avoid UI flicker
+    // 2) Persist data and update counters/status synchronously to ensure consistency
     this.foundItemsReported.add(id);
     this.storeFindersInformation(id, this.itemFoundForm);
-
-    setTimeout(() => {
-      // Update the complaint status to "In Progress" and refresh stats
-      this.updateStatus(id, 'In Progress');
-    }, 0);
+    
+    // 3) Update the complaint status to "In Progress" and refresh stats
+    this.updateStatus(id, 'In Progress');
+    
+    // 4) Force change detection to update the UI immediately
+    this.cdr.detectChanges();
   }
 
   // Calculate statistics based on complaint status
@@ -391,8 +395,26 @@ export class Complaints implements OnInit {
 
   // Check if an item has been reported as found
   isItemReportedAsFound(complaintId: number): boolean {
-    return this.foundItemsReported.has(complaintId) || 
-           !!JSON.parse(localStorage.getItem('foundItemsData') || '{}')[complaintId];
+    // First check the in-memory set
+    if (this.foundItemsReported.has(complaintId)) {
+      return true;
+    }
+    
+    // Then check localStorage as backup
+    try {
+      const findersData = JSON.parse(localStorage.getItem('foundItemsData') || '{}');
+      const hasFoundData = !!findersData[complaintId];
+      
+      // If found in localStorage but not in memory, add to memory set
+      if (hasFoundData && !this.foundItemsReported.has(complaintId)) {
+        this.foundItemsReported.add(complaintId);
+      }
+      
+      return hasFoundData;
+    } catch (error) {
+      console.error('Error checking found items data:', error);
+      return false;
+    }
   }
 
   // Get finder information for a complaint
