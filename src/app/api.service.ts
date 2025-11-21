@@ -31,37 +31,44 @@ export class ApiService {
   // POST request - Mock login (since reqres.in requires API key now)
   login(credentials: {username: string, password: string}): Observable<any> {
     // Simulate API call with delay
-    return of(null).pipe(delay(1000)).pipe(() => {
-      // Mock validation - you can change these credentials
-      if (credentials.username === 'admin' && credentials.password === 'admin123') {
-        return of({
-          success: true,
-          token: 'mock-jwt-token-' + Date.now(),
-          message: 'Login successful'
-        });
-      } else if (credentials.username === 'user' && credentials.password === 'password') {
-        return of({
-          success: true,
-          token: 'mock-jwt-token-' + Date.now(),
-          message: 'Login successful'
-        });
-      } else {
-        return throwError(() => new Error('Invalid credentials'));
-      }
+    return new Observable(observer => {
+      setTimeout(() => {
+        // Mock validation - you can change these credentials
+        if (credentials.username === 'admin' && credentials.password === 'admin123') {
+          observer.next({
+            success: true,
+            token: 'mock-jwt-token-' + Date.now(),
+            message: 'Login successful'
+          });
+          observer.complete();
+        } else if (credentials.username === 'user' && credentials.password === 'password') {
+          observer.next({
+            success: true,
+            token: 'mock-jwt-token-' + Date.now(),
+            message: 'Login successful'
+          });
+          observer.complete();
+        } else {
+          observer.error(new Error('Invalid credentials'));
+        }
+      }, 1000);
     });
   }
 
   // POST request - Mock registration
   register(userData: {username: string, password: string}): Observable<any> {
     // Simulate API call with delay
-    return of(null).pipe(delay(1000)).pipe(() => {
-      // Mock registration - always succeeds for demo
-      return of({
-        success: true,
-        id: Math.floor(Math.random() * 1000) + 1,
-        token: 'mock-jwt-token-' + Date.now(),
-        message: 'Registration successful'
-      });
+    return new Observable(observer => {
+      setTimeout(() => {
+        // Mock registration - always succeeds for demo
+        observer.next({
+          success: true,
+          id: Math.floor(Math.random() * 1000) + 1,
+          token: 'mock-jwt-token-' + Date.now(),
+          message: 'Registration successful'
+        });
+        observer.complete();
+      }, 1000);
     });
   }
 
